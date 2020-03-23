@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/sqls/Assignment 2/q1.sql" dialect="SQLite" />
+    <file url="file://$PROJECT_DIR$/sqls/Assignment 2/q2.sql" dialect="SQLite" />
+    <file url="file://$PROJECT_DIR$/sqls/Assignment 2/q3.sql" dialect="SQLite" />
+    <file url="file://$PROJECT_DIR$/sqls/exercise_lab4.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/sqls/filmdb.sql" dialect="SQLite" />
+    <file url="file://$PROJECT_DIR$/surface_temperature" dialect="PostgreSQL" />
+  </component>
+  <component name="SqlResolveMappings">
+    <file url="file://$PROJECT_DIR$/surface_temperature/src/SQLExecutor.java" scope="{&quot;node&quot;:{  &quot;@negative&quot;:&quot;1&quot;,  &quot;group&quot;:{   &quot;@kind&quot;:&quot;root&quot;,   &quot;node&quot;:{    &quot;name&quot;:{     &quot;@qname&quot;:&quot;17ef462f-987b-4fc9-9d73-e0491915ee52&quot;    },    &quot;group&quot;:{     &quot;@kind&quot;:&quot;database&quot;,     &quot;node&quot;:{      &quot;name&quot;:{       &quot;@qname&quot;:&quot;cs307&quot;      },      &quot;group&quot;:{       &quot;@kind&quot;:&quot;schema&quot;,       &quot;node&quot;:{        &quot;name&quot;:{         &quot;@qname&quot;:&quot;public&quot;        }       }      }     }    }   }  } }}" />
+    <file url="PROJECT" scope="{&quot;node&quot;:{  &quot;@negative&quot;:&quot;1&quot;,  &quot;group&quot;:{   &quot;@kind&quot;:&quot;root&quot;,   &quot;node&quot;:{    &quot;name&quot;:{     &quot;@qname&quot;:&quot;17ef462f-987b-4fc9-9d73-e0491915ee52&quot;    }   }  } }}" />
+  </component>
+</project>

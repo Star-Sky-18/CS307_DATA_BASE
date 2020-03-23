@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="cs307@localhost" uuid="17ef462f-987b-4fc9-9d73-e0491915ee52">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/cs307</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="filmdb(1).sqlite" uuid="ae5063bc-8bd1-4461-b27c-ec1a3e132ae0">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/../Downloads/filmdb(1).sqlite</jdbc-url>
+    </data-source>
+  </component>
+</project>
