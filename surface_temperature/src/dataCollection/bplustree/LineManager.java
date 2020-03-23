@@ -1,5 +1,7 @@
 package dataCollection.bplustree;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
@@ -7,18 +9,21 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class LineMap {
+public class LineManager {
+    private String lraFileName;
     private int[] lineBytePoint;
     private FileChannel fileChannel;
     private MappedByteBuffer mappedByteBuffer;
     private String lines;
 
-    private LineMap(String lraFilename,boolean preLoad){
+    private LineManager(String lraFilename, boolean preLoad){
+        this.lraFileName = lraFilename;
         var path = Paths.get(lraFilename);
         this.lines = preLoad?getAll():null;
         try {
@@ -71,11 +76,27 @@ public class LineMap {
     }
 
     public String[] getAllLines(){
-        return getAll().split(",");
+        return getAll().split("\n");
     }
 
-    public static LineMap getLineMapByLRAFileName(String lraFileName,boolean isPreLoad){
-        return new LineMap(lraFileName,isPreLoad);
+    public List<String[]> filterAllLines(Predicate<String[]> predicate) throws Exception{
+        var re = new ArrayList<String[]>();
+        try(var br = new BufferedReader(new FileReader(lraFileName))){
+            var line = br.readLine();
+            while((line=br.readLine())!=null){
+                var con = line.split(",");
+                if(predicate.test(con)){
+                    re.add(con);
+                }
+            }
+        }catch (Exception e){
+            throw e;
+        }
+        return re;
+    }
+
+    public static LineManager getLineMapByLRAFileName(String lraFileName, boolean isPreLoad){
+        return new LineManager(lraFileName,isPreLoad);
     }
 
     public int addLine(String line){

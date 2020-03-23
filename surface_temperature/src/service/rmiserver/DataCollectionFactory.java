@@ -1,8 +1,8 @@
-package service;
+package service.rmiserver;
 
 import com.esotericsoftware.kryo.io.Input;
 import dataCollection.bplustree.BPTree;
-import dataCollection.bplustree.LineMap;
+import dataCollection.bplustree.LineManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -128,10 +128,10 @@ public class DataCollectionFactory {
         channel.close();
     }
 
-    protected static void initTables(HashMap<String,LineMap> map, String... tableNames){
+    protected static void initTables(HashMap<String, LineManager> map, String... tableNames){
         try{
             for(var tableName:tableNames){
-                map.put(tableName,LineMap.getLineMapByLRAFileName(lraDir+File.separator+tableName+".lra",false));
+                map.put(tableName, LineManager.getLineMapByLRAFileName(lraDir+File.separator+tableName+".lra",false));
             }
         }catch (Exception e){
             e.printStackTrace();

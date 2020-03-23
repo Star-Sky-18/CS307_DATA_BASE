@@ -1,11 +1,11 @@
-package service;
+package service.rmiserver;
 
 import client.CallBack;
 import client.Task;
 import dataCollection.allinram.DataCollection;
 import dataCollection.allinram.MyDataCollection;
 import dataCollection.bplustree.BPTree;
-import dataCollection.bplustree.LineMap;
+import dataCollection.bplustree.LineManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,20 +17,20 @@ import java.util.concurrent.*;
 
 public class FileService {
     private static FileService service = new FileService();
-    private static final int CORE_POOL_SIZE =8;
+    private static final int CORE_POOL_SIZE =4;
     private static final int MAX_POOL_SIZE =32;
-    private static final int KEEP_ALIVE_TIME =5;
+    private static final int KEEP_ALIVE_TIME =10;
     private ThreadPoolExecutor poolExecutor;
     private ServiceQueue serviceQueue;
     protected DataCollection data;
     private DynamicClassLoader classLoader;
-    protected HashMap<String,LineMap> tableMap;
+    protected HashMap<String, LineManager> tableMap;
     protected HashMap<String, BPTree<String,Integer>> indexMap;
 
     FileService(){
         classLoader = new DynamicClassLoader();
         poolExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME,
-                TimeUnit.SECONDS,new ArrayBlockingQueue<>(32));
+                TimeUnit.SECONDS,new ArrayBlockingQueue<>(64));
         poolExecutor.prestartCoreThread();
         data = MyDataCollection.getDataCollection();
         try {

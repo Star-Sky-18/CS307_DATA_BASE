@@ -17,3 +17,4 @@ create table city_temperature
     primary key (date,city),
     foreign key (city) references city_country_ll(city)
 );
+create index

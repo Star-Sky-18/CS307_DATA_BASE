@@ -1,7 +1,6 @@
 package client;
 
-import dataCollection.allinram.DataCollection;
-import service.FileService;
+import service.rmiserver.FileService;
 
 import java.io.Serializable;
 

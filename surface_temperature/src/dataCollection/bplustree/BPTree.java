@@ -47,7 +47,7 @@ public class BPTree<K, V> implements Serializable {
     public abstract static class BNode<K, V> implements Serializable {
         protected int[] hashs;
         protected Object[] to;
-        protected transient BNode<K, V> from;
+        protected BNode<K, V> from;
         protected int number;
         protected int rank;
         protected BPTree<K, V> bPTree;
@@ -351,7 +351,7 @@ public class BPTree<K, V> implements Serializable {
 
             tempKeys[left] = key;
             tempKVs[left] = new KV<K, V>();
-            ((KV)tempKVs[left]).hash = key;
+            ((KV) tempKVs[left]).hash = key;
             ((KV<K, V>) tempKVs[left]).add(ok, value);
 
             this.number++;
@@ -402,24 +402,27 @@ public class BPTree<K, V> implements Serializable {
 
         @Override
         public List<V> find(int key, K ok) {
-            if (kvs == null) {
-                try {
-                    var bytes = Files.readAllBytes(Paths.get(valueFileName));
-                    if (bytes.length == 0) return null;
-                    var input = new Input(new ByteArrayInputStream(bytes), bytes.length * 2);
-                    this.kvs = kryo.readObject(input, Object[].class);
-                    input.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
+            if (kvs == null)
+                synchronized (this) {
+                    if (kvs == null) {
+                        try {
+                            var bytes = Files.readAllBytes(Paths.get(valueFileName));
+                            if (bytes.length == 0) return null;
+                            var input = new Input(new ByteArrayInputStream(bytes), bytes.length * 2);
+                            this.kvs = kryo.readObject(input, Object[].class);
+                            input.close();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-            }
             if (this.number <= 0)
-                return null;
+                return new ArrayList<>();
             int left = 0, right = this.number - 1;
             int middle = left + (right - left) / 2;
             while (left <= right) {
                 if (((KV<K, V>) kvs[middle]).getHash() == key) {
-                    return ((KV<K, V>) kvs[middle]).get(ok);//TODO
+                    return ((KV<K, V>) kvs[middle]).get(ok);
                 } else if (((KV<K, V>) kvs[middle]).getHash() > key) {
                     right = middle - 1;
                 } else {
@@ -427,7 +430,7 @@ public class BPTree<K, V> implements Serializable {
                 }
                 middle = left + (right - left) / 2;
             }
-            return null;
+            return new ArrayList<>();
         }
 
         @Override
