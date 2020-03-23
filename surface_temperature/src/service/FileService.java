@@ -4,7 +4,7 @@ import client.CallBack;
 import client.Task;
 import dataCollection.allinram.DataCollection;
 import dataCollection.allinram.MyDataCollection;
-import dataCollection.bplustree.BTree;
+import dataCollection.bplustree.BPTree;
 import dataCollection.bplustree.LineMap;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class FileService {
     protected DataCollection data;
     private DynamicClassLoader classLoader;
     protected HashMap<String,LineMap> tableMap;
-    protected HashMap<String, BTree<String,Integer>> indexMap;
+    protected HashMap<String, BPTree<String,Integer>> indexMap;
 
     FileService(){
         classLoader = new DynamicClassLoader();

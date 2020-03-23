@@ -11,7 +11,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 @SuppressWarnings("unchecked")
-public class BTree<K, V> implements Serializable {
+public class BPTree<K, V> implements Serializable {
     protected BNode<K, V> root;
     protected int rank;
     //    protected transient static FSTConfiguration fstConfiguration = FSTConfiguration.createDefaultConfiguration();
@@ -23,11 +23,11 @@ public class BTree<K, V> implements Serializable {
         kryo.setReferences(true);
     }
 
-    public BTree() {
+    public BPTree() {
 
     }
 
-    public BTree(int rank, String name) {
+    public BPTree(int rank, String name) {
         fileNameBase += name + "/";
         this.rank = rank + 1;
         root = new LeafNode(null, rank + 1, this);
@@ -50,18 +50,18 @@ public class BTree<K, V> implements Serializable {
         protected transient BNode<K, V> from;
         protected int number;
         protected int rank;
-        protected BTree<K, V> bTree;
+        protected BPTree<K, V> bPTree;
 
         protected BNode() {
 
         }
 
-        protected BNode(BNode<K, V> from, int size, BTree<K, V> bTree) {
+        protected BNode(BNode<K, V> from, int size, BPTree<K, V> bPTree) {
             hashs = new int[size];
             to = new Object[size];
             this.from = from;
             this.rank = size;
-            this.bTree = bTree;
+            this.bPTree = bPTree;
         }
 
 
@@ -101,8 +101,8 @@ public class BTree<K, V> implements Serializable {
 
         }
 
-        protected PlusNode(BNode<K, V> from, int size, BTree<K, V> bTree) {
-            super(from, size, bTree);
+        protected PlusNode(BNode<K, V> from, int size, BPTree<K, V> bPTree) {
+            super(from, size, bPTree);
         }
 
         @Override
@@ -180,13 +180,13 @@ public class BTree<K, V> implements Serializable {
             }
 
             int middle = this.number / 2;
-            PlusNode<K, V> tempNode = new PlusNode<>(from, rank, bTree);
+            PlusNode<K, V> tempNode = new PlusNode<>(from, rank, bPTree);
             tempNode.number = number - middle;
             if (from == null) {
-                PlusNode<K, V> tNode = new PlusNode<>(null, rank, bTree);
+                PlusNode<K, V> tNode = new PlusNode<>(null, rank, bPTree);
                 tempNode.from = tNode;
                 this.from = tNode;
-                bTree.root = tNode;
+                bPTree.root = tNode;
                 oldKey = 0;
             }
             System.arraycopy(tempKeys, middle, tempNode.hashs, 0, tempNode.number);
@@ -306,12 +306,12 @@ public class BTree<K, V> implements Serializable {
 
         }
 
-        protected LeafNode(BNode<K, V> from, int size, BTree<K, V> bTree) {
-            super(from, size, bTree);
+        protected LeafNode(BNode<K, V> from, int size, BPTree<K, V> bPTree) {
+            super(from, size, bPTree);
             this.left = null;
             this.right = null;
             kvs = new Object[size];
-            valueFileName = bTree.fileNameBase + bTree.orderForLeaf++ + ".kvs";
+            valueFileName = bPTree.fileNameBase + bPTree.orderForLeaf++ + ".kvs";
         }
 
         @Override
@@ -374,14 +374,14 @@ public class BTree<K, V> implements Serializable {
             }
 
             int middle = this.number / 2;
-            var tempNode = new LeafNode<>(this.from, rank, bTree);
+            var tempNode = new LeafNode<>(this.from, rank, bPTree);
             tempNode.number = this.number - middle;
 
             if (this.from == null) {
-                var plusNode = new PlusNode<>(null, rank, bTree);
+                var plusNode = new PlusNode<>(null, rank, bPTree);
                 this.from = plusNode;
                 tempNode.from = plusNode;
-                bTree.root = plusNode;
+                bPTree.root = plusNode;
                 oldKey = 0;
             }
             System.arraycopy(tempKeys, middle, tempNode.hashs, 0, tempNode.number);

@@ -1,7 +1,7 @@
 package service;
 
 import com.esotericsoftware.kryo.io.Input;
-import dataCollection.bplustree.BTree;
+import dataCollection.bplustree.BPTree;
 import dataCollection.bplustree.LineMap;
 
 import java.io.File;
@@ -29,7 +29,7 @@ public class DataCollectionFactory {
         getTreeByTableName_ColumnName("CityCountryLongitudeLatitude","City");
     }
 
-    public static BTree<String,Integer> getTreeByTableName_ColumnName(String tableName,String... columnName){
+    public static BPTree<String,Integer> getTreeByTableName_ColumnName(String tableName, String... columnName){
         var name = tableName+"_"+ String.join("_", columnName);
         var path = Paths.get(treeDir.getPath()+File.separator+name+".tree");
         if(!Files.exists(path.getParent())){
@@ -42,15 +42,15 @@ public class DataCollectionFactory {
         if(Files.exists(path)){
             try {
                 var bytes = Files.readAllBytes(path);
-                var kryo = BTree.getKryo();
-                return kryo.readObject(new Input(bytes),BTree.class);
+                var kryo = BPTree.getKryo();
+                return kryo.readObject(new Input(bytes), BPTree.class);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         try{
             System.out.println(name);
-            var bTree = new BTree<String,Integer>(195,name);
+            var bPTree = new BPTree<String,Integer>(195,name);
             var columnLine = Arrays.asList(columnMap.get(tableName));
             var indexs = new int[columnName.length];
             for(int i=0;i<indexs.length;i++){
@@ -68,10 +68,10 @@ public class DataCollectionFactory {
                        return re.toString();
                     }).collect(Collectors.toList());
             for(int i=0;i<lines.size();i++){
-                bTree.insert(lines.get(i).hashCode(),lines.get(i),i);
+                bPTree.insert(lines.get(i).hashCode(),lines.get(i),i);
             }
-            bTree.serialize();
-            return bTree;
+            bPTree.serialize();
+            return bPTree;
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -131,14 +131,14 @@ public class DataCollectionFactory {
     protected static void initTables(HashMap<String,LineMap> map, String... tableNames){
         try{
             for(var tableName:tableNames){
-                map.put(tableName,LineMap.getLineMapByLRAFileName(lraDir+File.separator+tableName+".lra"));
+                map.put(tableName,LineMap.getLineMapByLRAFileName(lraDir+File.separator+tableName+".lra",false));
             }
         }catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    protected static void initIndexs(HashMap<String,BTree<String,Integer>> map,String... indexNames){
+    protected static void initIndexs(HashMap<String, BPTree<String,Integer>> map, String... indexNames){
         for(var indexName:indexNames) {
             var names = indexName.split("_");
             var a = Arrays.copyOfRange(names,1,names.length);

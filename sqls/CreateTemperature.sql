@@ -1,4 +1,3 @@
-begin;
 drop table if exists city_temperature;
 drop table if exists city_country_ll;
 create table if not exists city_country_ll
@@ -18,4 +17,3 @@ create table city_temperature
     primary key (date,city),
     foreign key (city) references city_country_ll(city)
 );
-commit ;
