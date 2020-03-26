@@ -1,0 +1,60 @@
+<script src="https://cdn.bootcss.com/babel-polyfill/6.23.0/polyfill.min.js"></script>
+<script src="https://unpkg.com/frappe-charts@1.1.0"></script>
+<script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+<script>
+    let exc = false;
+    let chart = null;
+    window.onload = function () {
+        if (exc) return;
+        exc = true;
+        let labels = [];
+        for (let i = 0; i < 5; i++) {
+            labels[i] = (i+1)*10+" times query";
+        }
+        chart = new frappe.Chart("#chart", { // or DOM element
+            data: {
+                labels: labels,
+                datasets: [{
+                    name: "my file I/O",
+                    chartType: 'bar',
+                    values: [ 520, 1034, 1543, 2057, 2567 ]
+                }, {
+                    name: "postgresql",
+                    chartType: "bar",
+                    values: [ 1811, 1452, 1821, 2561, 3339 ]
+                }],
+                yMarkers: [{label: "Time cost (ms)", value: 4000, options: {labelPos: 'left'}}]
+            },
+            lineOptions: {
+                hideDots: 0
+            },
+            title: "The time cost of index File I/O Query and JDBC Database Query",
+            type: 'line', // or 'bar', 'line', 'pie', 'percentage'
+            height: 600,
+            axisOptions: {
+                xIsSeries: 1,
+                yAxisMode: 'span',
+                xAxisMode: 'tick'
+            },
+            colors: ['light-blue', 'green', 'red', 'light-blue', 'grey'],
+
+            tooltipOptions: {
+                formatTooltipX: d => (d + '').toUpperCase(),
+                formatTooltipY: d => d + ' pts',
+            }
+        });
+        // chart.export()
+        this.console.log('???!!!')
+        $('.title').css({fontSize: '20px',fill:'rgb(0,0,0)'})
+        $('.chart-label').css({fontSize: '12px'})
+    };
+
+    function myClick() {
+        chart.export()
+    }
+</script>
+<link rel="stylesheet" type="text/css" href="mystyle.css">
+<body>
+<div id="chart"></div>
+<button id="ex" onclick="myClick()"> Export</button>
+</body>

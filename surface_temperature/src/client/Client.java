@@ -1,23 +1,13 @@
 package client;
 
 import client.callbacks.PrintCallBack;
-import dataCollection.allinram.CityCountryLL;
-import dataCollection.allinram.CityTemperature;
-import dataCollection.allinram.DataCollection;
 import service.TTCFilter;
-import service.rmiserver.FileService;
-import service.rmiserver.MyServiceQueue;
 import service.rmiserver.ServiceQueue;
 
-import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.rmi.registry.LocateRegistry;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class Client {
     static {

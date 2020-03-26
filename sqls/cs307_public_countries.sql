@@ -8,8 +8,7 @@ create table if not exists countries
 		constraint countries_country_name_key
 			unique,
 	continent varchar(20) not null
-)
-;
+);
 INSERT INTO public.countries (country_code, country_name, continent) VALUES ('dz', 'Algeria', 'AFRICA');
 INSERT INTO public.countries (country_code, country_name, continent) VALUES ('ao', 'Angola', 'AFRICA');
 INSERT INTO public.countries (country_code, country_name, continent) VALUES ('bj', 'Benin', 'AFRICA');

@@ -1,0 +1,76 @@
+<script src="https://cdn.bootcss.com/babel-polyfill/6.23.0/polyfill.min.js"></script>
+<script src="https://unpkg.com/frappe-charts@1.1.0"></script>
+<script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+<script>
+    let exc = false;
+    let chart = null;
+    window.onload = function () {
+        if (exc) return;
+        exc = true;
+        let labels = [];
+        for (let i = 0; i < 5; i++) {
+            labels[i] = (i + 1) * 3 + " times query";
+        }
+        chart = new frappe.Chart("#chart", { // or DOM element
+            data: {
+                labels: labels,
+                datasets: [{
+                    name: "sync-tra-I/O",
+                    chartType: 'bar',
+                    values: [14012, 24461, 36910, 47905, 61299]
+                }, {
+                    name: "syn-tra-db",
+                    chartType: "bar",
+                    values: [3214, 1336, 2090, 2574, 3408]
+                }, {
+                    name: "sync-index-I/O",
+                    chartType: 'bar',
+                    values: [520, 1034, 1543, 2057, 2567]
+                }, {
+                    name: "sync-index-db",
+                    chartType: "bar",
+                    values: [1811, 1452, 1821, 2561, 3339]
+                },{
+                    name: "my file I/O",
+                    chartType: 'bar',
+                    values: [ 5107, 10207, 15286, 20434, 25489, 30661, 35729, 40762, 45954, 50868 ]
+                }, {
+                    name: "postgresql",
+                    chartType: "bar",
+                    values: [ 5054, 10109, 15195, 20240, 25300, 30337, 35392, 40439, 45572, 50527 ]
+                }],
+                yMarkers: [{label: "Time cost (ms)", value: 80000, options: {labelPos: 'left'}}]
+            },
+            lineOptions: {
+                hideDots: 0
+            },
+            title: "The time cost of all experiments",
+            type: 'line', // or 'bar', 'line', 'pie', 'percentage'
+            height: 600,
+            axisOptions: {
+                xIsSeries: 1,
+                yAxisMode: 'span',
+                xAxisMode: 'tick'
+            },
+            colors: ['light-blue', 'green', 'red', 'light-blue', 'grey'],
+
+            tooltipOptions: {
+                formatTooltipX: d => (d + '').toUpperCase(),
+                formatTooltipY: d => d + ' pts',
+            }
+        });
+        // chart.export()
+        this.console.log('???!!!')
+        $('.title').css({fontSize: '20px', fill: 'rgb(0,0,0)'})
+        $('.chart-label').css({fontSize: '12px'})
+    };
+
+    function myClick() {
+        chart.export()
+    }
+</script>
+<link rel="stylesheet" type="text/css" href="mystyle.css">
+<body>
+<div id="chart"></div>
+<button id="ex" onclick="myClick()"> Export</button>
+</body>

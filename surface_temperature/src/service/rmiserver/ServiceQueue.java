@@ -2,15 +2,13 @@ package service.rmiserver;
 
 import client.CallBack;
 import service.TTCFilter;
-import service.TestableQueue;
+import service.QueryableQueue;
 
 import java.rmi.Remote;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
-public interface ServiceQueue extends Remote, TestableQueue {
+public interface ServiceQueue extends Remote, QueryableQueue {
     void loadSerializableClass(String path, byte[] b) throws Exception;
 
     <T> void enqueueTask(byte[] b, CallBack<T> callBack) throws Exception;

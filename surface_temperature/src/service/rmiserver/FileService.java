@@ -17,8 +17,8 @@ import java.util.concurrent.*;
 
 public class FileService {
     private static FileService service = new FileService();
-    private static final int CORE_POOL_SIZE =4;
-    private static final int MAX_POOL_SIZE =32;
+    private static final int CORE_POOL_SIZE =16;
+    private static final int MAX_POOL_SIZE =64;
     private static final int KEEP_ALIVE_TIME =10;
     private ThreadPoolExecutor poolExecutor;
     private ServiceQueue serviceQueue;
@@ -30,28 +30,29 @@ public class FileService {
     FileService(){
         classLoader = new DynamicClassLoader();
         poolExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME,
-                TimeUnit.SECONDS,new ArrayBlockingQueue<>(64));
+                TimeUnit.SECONDS,new ArrayBlockingQueue<>(5000));
         poolExecutor.prestartCoreThread();
         data = MyDataCollection.getDataCollection();
         try {
-            serviceQueue = new MyServiceQueue(this);
+            serviceQueue = new RMIServiceQueryQueue(this, new RMIQueryHandler());
             tableMap = new HashMap<>();
             DataCollectionFactory.initTables(tableMap,"CityCountryLongitudeLatitude","TimeTemperatureCity");
-            indexMap = new HashMap<>();
-            DataCollectionFactory.initIndexs(indexMap,"TimeTemperatureCity_Time_City","CityCountryLongitudeLatitude_City");
+//            indexMap = new HashMap<>();
+//            DataCollectionFactory.initIndexs(indexMap,"TimeTemperatureCity_Time_City","CityCountryLongitudeLatitude_City");
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
         try{
             var registry = LocateRegistry.createRegistry(7718);
-            registry.bind("queue",service.serviceQueue);
+            registry.bind("queue",this.serviceQueue);
         }catch (Exception e){
             e.printStackTrace();
         }
         System.err.println("OK!");
+    }
+
+    public static void main(String[] args) {
+        getService();
     }
 
     public static FileService getService(){
@@ -60,25 +61,23 @@ public class FileService {
 
     @SuppressWarnings("unchecked")
     public <T> void execute(byte[] b, CallBack<T> callBack){
-        this.poolExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                var loader = new DynamicClassLoader();
-                var newClass = loader.loadMyClass(b);
-                Task<T> task = null;
-                try {
-                    var constructor = newClass.getDeclaredConstructor();
-                    constructor.setAccessible(true);
-                    task = (Task<T>) constructor.newInstance();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                T result = task.run(FileService.this);
-                try {
-                    callBack.callBack(result);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+        this.poolExecutor.execute(() -> {
+            var loader = new DynamicClassLoader();
+            var newClass = loader.loadMyClass(b);
+            Task<T> task = null;
+            try {
+                var constructor = newClass.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                task = (Task<T>) constructor.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            assert task != null;
+            T result = task.run(FileService.this);
+            try {
+                callBack.callBack(result);
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
         });
     }

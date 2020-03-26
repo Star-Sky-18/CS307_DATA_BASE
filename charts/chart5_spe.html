@@ -1,0 +1,68 @@
+<script src="https://cdn.bootcss.com/babel-polyfill/6.23.0/polyfill.min.js"></script>
+<script src="https://unpkg.com/frappe-charts@1.1.0"></script>
+<script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+<script>
+    let exc = false;
+    let chart = null;
+    window.onload = function () {
+        if (exc) return;
+        exc = true;
+        let labels = [];
+        for (let i = 0; i < 10; i++) {
+            labels[i] = (i + 1) * 5 + " concurrency tasks";
+        }
+        chart = new frappe.Chart("#chart", { // or DOM element
+            data: {
+                labels: labels,
+                datasets: [{
+                    name: "file I/O's max",
+                    chartType: 'bar',
+                    values: [49.33,60.66,64,96,71,89,107.66,121.33,141.33,136.66]
+                }, {
+                    name: "postgreSQL's max",
+                    chartType: "bar",
+                    values: [5007.33,7326,9911.33,12251.66,15700,17671.66,19992.66,21929,24978.66,27107.33]
+                },{
+                    name: "file I/O's average",
+                    chartType: 'line',
+                    values: [41.86,56.66,61.84,94.28,65.08,87.78,104.02,105.59,137.94,124.61]
+                },{
+                    name: "postgreSQL's average",
+                    chartType: 'line',
+                    values: [4471,6076.1,8663.93,10567.3,13556.18,14992.68,17192.29,19135.32,21713.22,23753.79]
+                }],
+                yMarkers: [{label: "Time cost (ms)", value: 30000, options: {labelPos: 'left'}}]
+            },
+            lineOptions: {
+                hideDots: 0
+            },
+            title: "Special Concurrency Index Query in Each Mode",
+            type: 'line', // or 'bar', 'line', 'pie', 'percentage'
+            height: 600,
+            axisOptions: {
+                xIsSeries: 1,
+                yAxisMode: 'span',
+                xAxisMode: 'tick'
+            },
+            colors: ['light-blue', 'green', 'red', '#ffa3ef', 'grey'],
+
+            tooltipOptions: {
+                formatTooltipX: d => (d + '').toUpperCase(),
+                formatTooltipY: d => d + ' pts',
+            }
+        });
+        // chart.export()
+        this.console.log('???!!!')
+        $('.title').css({fontSize: '20px', fill: 'rgb(0,0,0)'})
+        $('.chart-label').css({fontSize: '12px'})
+    };
+
+    function myClick() {
+        chart.export()
+    }
+</script>
+<link rel="stylesheet" type="text/css" href="mystyle.css">
+<body>
+<div id="chart"></div>
+<button id="ex" onclick="myClick()"> Export</button>
+</body>

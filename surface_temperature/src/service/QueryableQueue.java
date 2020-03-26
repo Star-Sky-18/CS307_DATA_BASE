@@ -4,7 +4,7 @@ import client.CallBack;
 
 import java.util.List;
 
-public interface TestableQueue {
+public interface QueryableQueue {
     void queryTTCByTimeCity(int timeStart,int timeStop,String city, CallBack<List<String[]>> callBack) throws Exception;
 
     void queryCCLLByCity(String city, CallBack<String[]> callBack) throws Exception;

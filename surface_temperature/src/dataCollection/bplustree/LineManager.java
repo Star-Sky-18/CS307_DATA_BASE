@@ -29,12 +29,30 @@ public class LineManager {
         try {
             fileChannel = FileChannel.open(path,StandardOpenOption.READ,StandardOpenOption.WRITE);
             mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE,0,Files.size(path));
-            var list = Files.readString(path).split("\n");
-            lineBytePoint = new int[list.length];
-            lineBytePoint[0]= list[0].getBytes().length+1;
-            for(int i=1;i<list.length;i++){
-                lineBytePoint[i] = lineBytePoint[i-1] + list[i].getBytes().length+1;
+            try(var bf = new BufferedReader(new FileReader(lraFileName))){
+                var line = bf.readLine();
+                lineBytePoint = new int[9000000];
+                lineBytePoint[0]= line.getBytes().length+1;
+                var index = 1;
+                while((line=bf.readLine())!=null){
+                    lineBytePoint[index] = lineBytePoint[index++-1] + line.getBytes().length+1;
+                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
+//            var list = Files.readString(path).split("\n");
+//            var lineBytePoint = new int[list.length];
+//            lineBytePoint[0]= list[0].getBytes().length+1;
+//            for(int i=1;i<list.length;i++){
+//                lineBytePoint[i] = lineBytePoint[i-1] + list[i].getBytes().length+1;
+//            }
+//            for(int i=0;i<lineBytePoint.length;i++){
+//                if(lineBytePoint[i]!=this.lineBytePoint[i]){
+//                    System.out.println(lineBytePoint[i]+" "+this.lineBytePoint[i]);
+//                }else{
+//                    System.out.println(true);
+//                }
+//            }
         } catch (IOException e) {
             e.printStackTrace();
         }

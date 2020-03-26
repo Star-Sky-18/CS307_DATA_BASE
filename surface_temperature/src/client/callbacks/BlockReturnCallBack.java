@@ -17,20 +17,17 @@ public class BlockReturnCallBack<T> extends PrintCallBack<T> implements CallBack
 
     @Override
     public void callBack(T t) throws RemoteException {
-        new Thread(() -> {
-            this.t = t;
-            synchronized (BlockReturnCallBack.this) {
-                count++;
-            }
-            if (timeFlag)
-                System.out.println(str + " time: " + (System.currentTimeMillis() - this.start));
-
-        }).start();
+        this.t = t;
+        synchronized (BlockReturnCallBack.this) {
+            count++;
+        }
+        if (timeFlag)
+            System.out.print(" ," + (System.currentTimeMillis() - this.start));
     }
 
     public T block() throws InterruptedException {
         while (this.t == null) {
-            Thread.sleep(10);
+            Thread.sleep(50);
         }
         var re = t;
         this.t = null;
@@ -40,7 +37,7 @@ public class BlockReturnCallBack<T> extends PrintCallBack<T> implements CallBack
     public void blockForAll() throws InterruptedException {
         while (count < max)
             Thread.sleep(50);
-        if (autoUnexport && count == max) {
+        if (autoUnexport) {
             try {
                 UnicastRemoteObject.unexportObject(this, false);
             } catch (NoSuchObjectException e) {
