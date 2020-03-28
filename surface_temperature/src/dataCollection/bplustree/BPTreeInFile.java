@@ -1,34 +1,36 @@
 package dataCollection.bplustree;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+import org.nustaq.serialization.FSTConfiguration;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 
-@SuppressWarnings("unchecked")
-public class BPTree<K, V> implements Serializable {
-    protected BNode<K, V> root;
+@SuppressWarnings("all")
+public class BPTreeInFile<K, V> implements Serializable {
+
+    protected BNode root;
     protected int rank;
-    //    protected transient static FSTConfiguration fstConfiguration = FSTConfiguration.createDefaultConfiguration();
-    protected String fileNameBase = "./trees/";
-    protected int orderForLeaf;
-    protected final transient static Kryo kryo = new Kryo();
+    protected String fileName = "./fileTrees/";
+    protected transient static Kryo kryo = new Kryo();
+    protected int count = 0;
 
     static {
         kryo.setReferences(true);
     }
 
-    public BPTree() {
+    public BPTreeInFile() {
 
     }
 
-    public BPTree(int rank, String name) {
-        fileNameBase += name + "/";
+    public BPTreeInFile(int rank, String name) {
+        fileName += name + "/";
         this.rank = rank + 1;
         root = new LeafNode(null, rank + 1, this);
     }
@@ -44,23 +46,26 @@ public class BPTree<K, V> implements Serializable {
         return this.root.find(hash, key);
     }
 
-    public abstract static class BNode<K, V> implements Serializable {
+    public abstract static class BNode<K,V> implements Serializable {
         protected int[] hashs;
-        protected Object[] to;
-        protected BNode<K, V> from;
-        protected int number;
+        protected String name;
+        protected transient Object[] to;
+        protected String[] _to;
         protected int rank;
-        protected BPTree<K, V> bPTree;
+        protected String baseName;
+        protected transient BNode from;
+        protected int number;
+        protected transient BPTreeInFile<K, V> bPTree;
 
         protected BNode() {
 
         }
 
-        protected BNode(BNode<K, V> from, int size, BPTree<K, V> bPTree) {
+        protected BNode(BNode from, int size, BPTreeInFile<K, V> bPTree) {
             hashs = new int[size];
             to = new Object[size];
+            _to = new String[size];
             this.from = from;
-            this.rank = size;
             this.bPTree = bPTree;
         }
 
@@ -93,23 +98,26 @@ public class BPTree<K, V> implements Serializable {
 
         public abstract List<V> find(int key, K ok);
 
-        public abstract LeafNode<K, V> refreshLeft();
+        public abstract LeafNode refreshLeft();
+
+        protected abstract void serialize();
     }
 
-    protected static class PlusNode<K, V> extends BNode<K, V> {
+    protected static class PlusNode<K,V> extends BNode<K,V> {
         protected PlusNode() {
 
         }
 
-        protected PlusNode(BNode<K, V> from, int size, BPTree<K, V> bPTree) {
+        protected PlusNode(BNode from, int size, BPTreeInFile<K, V> bPTree) {
             super(from, size, bPTree);
+            this.name = bPTree.count++ + ".n";
         }
 
         @Override
         public void insert(int key, K ok, V value) {
             int left = 0, right = number - 1;
             if (key > this.hashs[right]) {
-                ((BNode<K, V>) this.to[right]).insert(key, ok, value);
+                ((BNode) this.to[right]).insert(key, ok, value);
                 return;
             }
             while (left < right) {
@@ -118,38 +126,74 @@ public class BPTree<K, V> implements Serializable {
                     right = mid;
                 } else {
                     if (left == mid && this.hashs[mid] >= key) {
-                        ((BNode<K, V>) this.to[left]).insert(key, ok, value);
+                        ((BNode) this.to[left]).insert(key, ok, value);
                         return;
                     }
                     left = mid + 1;
                 }
             }
-            ((BNode<K, V>) this.to[right]).insert(key, ok, value);
+            ((BNode) this.to[right]).insert(key, ok, value);
         }
 
         @Override
         public List<V> find(int key, K ok) {
+            if (to == null)
+                synchronized (this) {
+                    if (to == null) to = new Object[this.hashs.length];
+                }
             int left = 0, right = number - 1;
             while (left < right) {
                 int mid = left + (right - left) / 2;
                 if (key <= this.hashs[mid] || this.hashs[mid] == 0) {
                     right = mid;
                 } else {
-                    if (left == mid)
-                        return ((BNode<K, V>) this.to[left + 1]).find(key, ok);
+                    if (left == mid) {
+                        right = left + 1;
+                        break;
+                    }
                     left = mid;
                 }
             }
-            return ((BNode<K, V>) this.to[right]).find(key, ok);
+            try {
+                BNode next = to[right] == null ? null : (BNode) to[right];
+                var s = System.currentTimeMillis();
+                if (next == null) {
+                    synchronized (this) {
+                        if (to[right] == null) {
+                            var bytes = Files.readAllBytes(Paths.get(baseName+_to[right]));
+//                            var bytes = new byte[10];//TODO
+                            var input = new Input(bytes);
+                            synchronized (kryo) {
+                                if (_to[right].contains(".l")) {
+                                    next = kryo.readObject(input, LeafNode.class);
+                                } else {
+                                    next = kryo.readObject(input, PlusNode.class);
+                                }
+                            }
+                            to[right] = next;
+                            input.close();
+                        } else {
+                            next = (BNode) to[right];
+                        }
+                    }
+                }
+                System.err.println(System.currentTimeMillis()-s);
+                return next.find(key, ok);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
         }
 
-        BNode<K, V> insertNode(BNode<K, V> node1, BNode<K, V> node2, int key) {
+        BNode insertNode(BNode node1, BNode node2, int key) {
             int oldKey = 0;
             if (this.number > 0)
                 oldKey = this.hashs[this.number - 1];
             if (key == 0 || this.number <= 0) {
                 this.hashs[0] = node1.hashs[node1.number - 1];
                 this.hashs[1] = node2.hashs[node2.number - 1];
+                this._to[0] = node1.name;
+                this._to[1] = node2.name;
                 this.to[0] = node1;
                 this.to[1] = node2;
                 this.number += 2;
@@ -160,30 +204,36 @@ public class BPTree<K, V> implements Serializable {
 
             this.hashs[left] = node1.hashs[node1.number - 1];
             this.to[left] = node1;
+            this._to[left] = node1.name;
 
             int[] tempKeys = new int[rank];
             Object[] tempTo = new Object[rank];
+            var temp_tp = new String[rank];
             System.arraycopy(this.hashs, 0, tempKeys, 0, left + 1);
             System.arraycopy(this.to, 0, tempTo, 0, left + 1);
+            System.arraycopy(this._to, 0, temp_tp, 0, left + 1);
             System.arraycopy(this.hashs, left + 1, tempKeys, left + 2, this.number - left - 1);
             System.arraycopy(this.to, left + 1, tempTo, left + 2, this.number - left - 1);
+            System.arraycopy(this._to, left + 1, temp_tp, left + 2, this.number - left - 1);
 
             tempKeys[left + 1] = node2.hashs[node2.number - 1];
             tempTo[left + 1] = node2;
+            temp_tp[left + 1] = node2.name;
 
             this.number++;
 
             if (this.number < rank) {
                 System.arraycopy(tempKeys, 0, this.hashs, 0, this.number);
                 System.arraycopy(tempTo, 0, this.to, 0, this.number);
+                System.arraycopy(temp_tp, 0, this._to, 0, this.number);
                 return this;//TODO
             }
 
             int middle = this.number / 2;
-            PlusNode<K, V> tempNode = new PlusNode<>(from, rank, bPTree);
+            PlusNode tempNode = new PlusNode(from, rank, bPTree);
             tempNode.number = number - middle;
             if (from == null) {
-                PlusNode<K, V> tNode = new PlusNode<>(null, rank, bPTree);
+                PlusNode tNode = new PlusNode(null, rank, bPTree);
                 tempNode.from = tNode;
                 this.from = tNode;
                 bPTree.root = tNode;
@@ -191,26 +241,50 @@ public class BPTree<K, V> implements Serializable {
             }
             System.arraycopy(tempKeys, middle, tempNode.hashs, 0, tempNode.number);
             System.arraycopy(tempTo, middle, tempNode.to, 0, tempNode.number);
+            System.arraycopy(temp_tp, middle, tempNode._to, 0, tempNode.number);
             for (Object b : tempNode.to) {
                 if (b == null) break;
-                ((BNode<K, V>) b).from = tempNode;
+                ((BNode) b).from = tempNode;
             }
             this.number = middle;
             this.hashs = new int[rank];
             this.to = new Object[rank];
+            this._to = new String[rank];
             System.arraycopy(tempKeys, 0, this.hashs, 0, this.number);
             System.arraycopy(tempTo, 0, this.to, 0, this.number);
+            System.arraycopy(temp_tp, 0, this._to, 0, this.number);
 
-            return ((PlusNode<K, V>) from).insertNode(this, tempNode, oldKey);
+            return ((PlusNode) from).insertNode(this, tempNode, oldKey);
         }
 
         @Override
-        public LeafNode<K, V> refreshLeft() {
-            return ((BNode<K, V>) this.to[0]).refreshLeft();
+        public LeafNode refreshLeft() {
+            return ((BNode) this.to[0]).refreshLeft();
         }
+
+        protected void serialize() {
+            if (this != bPTree.root) {
+                var output = new Output(1 << 20);
+                BufferedOutputStream bytes = null;
+                try {
+                    bytes = new BufferedOutputStream(new FileOutputStream(baseName+name));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                output.setOutputStream(bytes);
+                kryo.writeObject(output, this);
+                output.close();
+            }
+            for (var b : this.to) {
+                if (b == null)
+                    break;
+                ((BNode) b).serialize();
+            }
+        }
+
     }
 
-    protected static class LeafNode<K, V> extends BNode<K, V> {
+    protected static class LeafNode<K,V> extends BNode<K,V> {
         private static class KV<K, V> implements KeyAndValues<K, V> {
             ValueNode<K, V> first;
             ValueNode<K, V> last;
@@ -297,37 +371,24 @@ public class BPTree<K, V> implements Serializable {
             }
         }
 
-        protected String valueFileName;
-        protected transient Object[] kvs;
-        protected LeafNode<K, V> left;
-        protected LeafNode<K, V> right;
+        protected KV[] kvs;
+        protected transient LeafNode left;
+        protected transient LeafNode right;
 
         protected LeafNode() {
 
         }
 
-        protected LeafNode(BNode<K, V> from, int size, BPTree<K, V> bPTree) {
+        protected LeafNode(BNode from, int size, BPTreeInFile<K, V> bPTree) {
             super(from, size, bPTree);
             this.left = null;
             this.right = null;
-            kvs = new Object[size];
-            valueFileName = bPTree.fileNameBase + bPTree.orderForLeaf++ + ".kvs";
+            kvs = new KV[size];
+            this.name = bPTree.count++ + ".l";
         }
 
         @Override
         public void insert(int key, K ok, V value) {
-            if (kvs == null) {
-                try {
-                    var input = new Input(1 << 20);
-                    input.setInputStream(new FileInputStream(valueFileName));
-                    this.kvs = kryo.readObject(input, Object[].class);
-                    input.close();
-//                    var in = fstConfiguration.getObjectInput(new FileInputStream(valueFileName));
-//                    kvs = (Object[]) in.readObject(Object[].class);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
             int oldKey = 0;
             if (this.number > 0)
                 oldKey = this.hashs[this.number - 1];
@@ -342,25 +403,25 @@ public class BPTree<K, V> implements Serializable {
                 left++;
             }
 
-            int[] tempKeys = new int[rank];
-            Object[] tempKVs = new Object[rank];
+            var tempKeys = new int[hashs.length];
+            var tempKVs = new Object[hashs.length];
             System.arraycopy(this.hashs, 0, tempKeys, 0, left);
             System.arraycopy(this.kvs, 0, tempKVs, 0, left);
             System.arraycopy(this.hashs, left, tempKeys, left + 1, this.number - left);
             System.arraycopy(this.kvs, left, tempKVs, left + 1, this.number - left);
 
             tempKeys[left] = key;
-            tempKVs[left] = new KV<K, V>();
+            tempKVs[left] = new KV<>();
             ((KV) tempKVs[left]).hash = key;
             ((KV<K, V>) tempKVs[left]).add(ok, value);
 
             this.number++;
 
-            if (this.number < rank) {
+            if (this.number < hashs.length) {
                 System.arraycopy(tempKeys, 0, this.hashs, 0, this.number);
                 System.arraycopy(tempKVs, 0, this.kvs, 0, this.number);
 
-                BNode<K, V> node = this;
+                BNode node = this;
                 while (node.from != null) {
                     int tempKey = node.hashs[node.number - 1];
                     if (tempKey > node.from.hashs[node.from.number - 1]) {
@@ -374,11 +435,11 @@ public class BPTree<K, V> implements Serializable {
             }
 
             int middle = this.number / 2;
-            var tempNode = new LeafNode<>(this.from, rank, bPTree);
+            var tempNode = new LeafNode(this.from, hashs.length, bPTree);
             tempNode.number = this.number - middle;
 
             if (this.from == null) {
-                var plusNode = new PlusNode<>(null, rank, bPTree);
+                BNode plusNode = new PlusNode(null, hashs.length, bPTree);
                 this.from = plusNode;
                 tempNode.from = plusNode;
                 bPTree.root = plusNode;
@@ -388,8 +449,8 @@ public class BPTree<K, V> implements Serializable {
             System.arraycopy(tempKVs, middle, tempNode.kvs, 0, tempNode.number);
 
             this.number = middle;
-            this.hashs = new int[rank];
-            this.kvs = new Object[rank];
+            this.hashs = new int[hashs.length];
+            this.kvs = new KV[hashs.length];
             System.arraycopy(tempKeys, 0, this.hashs, 0, middle);
             System.arraycopy(tempKVs, 0, this.kvs, 0, middle);
 
@@ -397,35 +458,19 @@ public class BPTree<K, V> implements Serializable {
             this.right = tempNode;
             tempNode.left = this;
 
-            ((PlusNode<K, V>) from).insertNode(this, tempNode, oldKey);
+            ((PlusNode) from).insertNode(this, tempNode, oldKey);
         }
 
         @Override
         public List<V> find(int key, K ok) {
-            if (kvs == null)
-                synchronized (this) {
-                    if (kvs == null) {
-                        try {
-                            var bytes = Files.readAllBytes(Paths.get(valueFileName));
-                            if (bytes.length == 0) return null;
-                            var input = new Input(new ByteArrayInputStream(bytes), bytes.length * 2);
-                            synchronized (kryo) {
-                                this.kvs = kryo.readObject(input, Object[].class);
-                            }
-                            input.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
             if (this.number <= 0)
                 return new ArrayList<>();
             int left = 0, right = this.number - 1;
             int middle = left + (right - left) / 2;
             while (left <= right) {
-                if (((KV<K, V>) kvs[middle]).getHash() == key) {
-                    return ((KV<K, V>) kvs[middle]).get(ok);
-                } else if (((KV<K, V>) kvs[middle]).getHash() > key) {
+                if (kvs[middle].getHash() == key) {
+                    return kvs[middle].get(ok);
+                } else if (kvs[middle].getHash() > key) {
                     right = middle - 1;
                 } else {
                     left = middle + 1;
@@ -436,63 +481,49 @@ public class BPTree<K, V> implements Serializable {
         }
 
         @Override
-        public LeafNode<K, V> refreshLeft() {
+        public LeafNode refreshLeft() {
             if (this.number <= 0)
                 return null;
             return this;
         }
 
         protected void serialize() {
-            try {
-                var output = new Output(1 << 20);
-                output.setOutputStream(new FileOutputStream(valueFileName));
-                kryo.writeObject(output, this.kvs);
-//                var in = fstConfiguration.getObjectOutput(new FileOutputStream(valueFileName));
-//                in.writeObject(this.kvs);
-//                in.flush();
-                output.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            var output = new Output(1 << 20);
+//                output.setOutputStream(new FileOutputStream(bPTree.fileNameBase + name));
+            kryo.writeObject(output, this);
+            output.close();
         }
 
     }
 
     public void serialize() {
         try {
-            var path = fileNameBase.substring(0, fileNameBase.length() - 1) + ".tree";
-            if (!Files.exists(Paths.get(fileNameBase))) {
-                Files.createDirectories(Paths.get(fileNameBase));
+            var path = fileName.substring(0, fileName.length() - 1) + ".tree";
+            if (!Files.exists(Paths.get(fileName))) {
+                Files.createDirectories(Paths.get(fileName));
             }
             var output = new Output(new FileOutputStream(path));
             kryo.writeObject(output, this);
             output.close();
-            var bNode = root;
-            while (!(bNode.getClass().equals(LeafNode.class))) {
-                bNode = ((BNode<K, V>) bNode.to[0]);
-            }
-            while (bNode != null) {
-                ((LeafNode<K, V>) bNode).serialize();
-                bNode = ((LeafNode<K, V>) bNode).right;
-            }
-//            in.close();
+            root.serialize();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public LeafNode<K, V> getFirstLeaf() {
+    public LeafNode getFirstLeaf() {
         var bNode = root;
         var i = 1;
         while (!(bNode.getClass().equals(LeafNode.class))) {
-            bNode = ((BNode<K, V>) bNode.to[0]);
+            bNode = ((BNode) bNode.to[0]);
             i++;
         }
         System.out.println(i);
-        return (LeafNode<K, V>) bNode;
+        return (LeafNode) bNode;
     }
 
     public static Kryo getKryo() {
         return kryo;
     }
 }
+

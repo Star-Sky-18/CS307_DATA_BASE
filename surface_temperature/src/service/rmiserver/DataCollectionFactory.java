@@ -2,6 +2,7 @@ package service.rmiserver;
 
 import com.esotericsoftware.kryo.io.Input;
 import dataCollection.bplustree.BPTree;
+import dataCollection.bplustree.BPTreeInFile;
 import dataCollection.bplustree.LineManager;
 
 import java.io.File;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unchecked")
 public class DataCollectionFactory {
     static File lraDir = new File("lras");
-    static File treeDir = new File("trees");
+    static File treeDir = new File("fileTrees");
     static HashMap<String,String[]> columnMap;
 
     static{
@@ -25,8 +26,59 @@ public class DataCollectionFactory {
     public static void main(String[] args) throws IOException {
 //        parseMyCsvTo_TTC();
 //        parseMyCsvTo_CCLL();
-        getTreeByTableName_ColumnName("TimeTemperatureCity","Time","City");
-        getTreeByTableName_ColumnName("CityCountryLongitudeLatitude","City");
+        var v = getFileTreeByTableName_ColumnName("TimeTemperatureCity","Time","City");
+//        var v = getFileTreeByTableName_ColumnName("CityCountryLongitudeLatitude","City");
+        System.out.println(v.find("198001Kashi".hashCode(),null));
+//        System.out.println(v.find("Beian".hashCode(),""));
+    }
+
+    public static BPTreeInFile<String,Integer> getFileTreeByTableName_ColumnName(String tableName, String... columnName){
+        var name = tableName+"_"+ String.join("_", columnName);
+        var path = Paths.get(treeDir.getPath()+File.separator+name+".tree");
+        if(!Files.exists(path.getParent())){
+            try {
+                Files.createDirectories(path.getParent());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(Files.exists(path)){
+            try {
+                var bytes = Files.readAllBytes(path);
+                var kryo = BPTree.getKryo();
+                return kryo.readObject(new Input(bytes), BPTreeInFile.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try{
+            System.out.println(name);
+            var bPTree = new BPTreeInFile<String,Integer>(195,name);
+            var columnLine = Arrays.asList(columnMap.get(tableName));
+            var indexs = new int[columnName.length];
+            for(int i=0;i<indexs.length;i++){
+                indexs[i] = columnLine.indexOf(columnName[i]);
+            }
+            System.out.println(Arrays.toString(indexs));
+            var tablePath = Paths.get(lraDir+File.separator+tableName+".lra");
+            var lines = Files.lines(tablePath)
+                    .skip(1).map(s-> {
+                        var con =  s.split(",");
+                        StringBuilder re = new StringBuilder();
+                        for (int index : indexs) {
+                            re.append(con[index]);
+                        }
+                        return re.toString();
+                    }).collect(Collectors.toList());
+            for(int i=0;i<lines.size();i++){
+                bPTree.insert(lines.get(i).hashCode(),lines.get(i),i);
+            }
+            bPTree.serialize();
+            return bPTree;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        throw new NullPointerException();
     }
 
     public static BPTree<String,Integer> getTreeByTableName_ColumnName(String tableName, String... columnName){
@@ -138,11 +190,21 @@ public class DataCollectionFactory {
         }
     }
 
-    protected static void initIndexs(HashMap<String, BPTree<String,Integer>> map, String... indexNames){
+    protected static void initIndexs(boolean file,HashMap<String, BPTree<String,Integer>> map, String... indexNames){
         for(var indexName:indexNames) {
             var names = indexName.split("_");
             var a = Arrays.copyOfRange(names,1,names.length);
-            map.put(indexName, getTreeByTableName_ColumnName(names[0],a));
+            if(!file)
+                map.put(indexName, getTreeByTableName_ColumnName(names[0],a));
         }
     }
+
+    protected static void initIndexs(HashMap<String, BPTreeInFile<String,Integer>> map, String... indexNames){
+        for(var indexName:indexNames) {
+            var names = indexName.split("_");
+            var a = Arrays.copyOfRange(names,1,names.length);
+            map.put(indexName, getFileTreeByTableName_ColumnName(names[0],a));
+        }
+    }
+
 }

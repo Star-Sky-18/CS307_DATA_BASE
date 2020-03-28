@@ -41,7 +41,7 @@ public class RMIServiceQueryQueue extends UnicastRemoteObject implements Service
      */
     @Override
     public void serialize() throws RemoteException {
-        fileService.indexMap.values().forEach(BPTree::serialize);
+        fileService.indexMap.values().forEach(i->i.serialize());
         fileService.tableMap.values().forEach(LineManager::flush);
     }
 

@@ -46,6 +46,7 @@ public class FinalTest {
         pw.write(bos.toByteArray());
         pw.close();
         JdbcQueryExecutor.close();
+        System.err.println("finish");
     }
 
     @Test
@@ -90,7 +91,7 @@ public class FinalTest {
             var start = System.currentTimeMillis();
             for (int i = 0; i < j * 10; i++) {
                 var callBack0 = new BlockReturnCallBack<List<String[]>>(true, true, "2.rmi");
-                rmi.queryTTCByTimeCity(196001, 198012, "Kashi", callBack0);
+                rmi.queryTTCByTimeCity(198001, 198001, "Kashi", callBack0);
                 callBack0.block();
             }
             System.out.println("\n-----------------------------");
@@ -100,7 +101,7 @@ public class FinalTest {
             var start2 = System.currentTimeMillis();
             for (int i = 0; i < j * 10; i++) {
                 var callBack1 = new BlockReturnCallBack<List<String[]>>(true, true, "2.jdbc");
-                jdbc.queryTTCByTimeCity(196001, 198012, "Kashi", callBack1);
+                jdbc.queryTTCByTimeCity(198001, 198001, "Kashi", callBack1);
                 callBack1.block();
             }
             System.out.println("\n-----------------------------");
@@ -276,25 +277,25 @@ public class FinalTest {
     @Test
     public void test08_special_index_query() throws Exception {
         System.out.println("\ntest08:");
-        for (int j = 1; j <= 10; j++) {
+        for (int j = 1; j <= 1; j++) {
             System.out.println(j);
             QueueFactory.init();
             var callback0 = new BlockReturnCallBack<List<String[]>>(true, true, "5.rmi");
-            callback0.setMax(5 * j);
-            for (int i = 0; i < 5 * j; i++) {
+            callback0.setMax(1);
+            for (int i = 0; i < 1; i++) {
                 Objects.requireNonNull(QueueFactory.getRMIQueue())
-                        .queryTTCByTimeCity(190001, 200001, "Xuanhua", callback0);
+                        .queryTTCByTimeCity(190001, 200001, "Luzhou", callback0);
             }
             callback0.blockForAll();
             System.out.println("\n-----------------------------");
             var jdbcs = new ArrayList<QueryableQueue>(5 * j);
-            for (int i = 0; i < 5 * j; i++) {
+            for (int i = 0; i < 1; i++) {
                 jdbcs.add(QueueFactory.getJDBCQueue(true));
             }
             var callback1 = new BlockReturnCallBack<List<String[]>>(true, true, "5.jdbc");
-            callback1.setMax(5 * j);
-            for (int i = 0; i < 5 * j; i++) {
-                jdbcs.get(i).queryTTCByTimeCity(190001, 200001, "Xuanhua", callback1);
+            callback1.setMax(1);
+            for (int i = 0; i < 1; i++) {
+                jdbcs.get(i).queryTTCByTimeCity(190001, 200001, "Luzhou", callback1);
             }
             callback1.blockForAll();
             System.out.println("\n-----------------------------");

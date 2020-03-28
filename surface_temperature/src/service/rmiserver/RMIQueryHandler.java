@@ -20,7 +20,7 @@ public class RMIQueryHandler {
             }
         }
         try {
-            var result = keys.stream().map(i -> fileService.indexMap.get("TimeTemperatureCity_Time_City").find(i, null))
+            var result = keys.parallelStream().map(i -> fileService.indexMap.get("TimeTemperatureCity_Time_City").find(i, null))
                     .flatMap(Collection::stream).map(fileService.tableMap.get("TimeTemperatureCity")::getInfoByLine)
                     .collect(Collectors.toList());
             callBack.callBack(result);

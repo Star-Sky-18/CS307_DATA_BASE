@@ -5,6 +5,7 @@ import client.Task;
 import dataCollection.allinram.DataCollection;
 import dataCollection.allinram.MyDataCollection;
 import dataCollection.bplustree.BPTree;
+import dataCollection.bplustree.BPTreeInFile;
 import dataCollection.bplustree.LineManager;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.util.HashMap;
 import java.util.concurrent.*;
 
 public class FileService {
-    private static FileService service = new FileService();
+    private static FileService service;
     private static final int CORE_POOL_SIZE =4;
     private static final int MAX_POOL_SIZE =50;
     private static final int KEEP_ALIVE_TIME =60;
@@ -25,6 +26,7 @@ public class FileService {
     protected DataCollection data;
     private DynamicClassLoader classLoader;
     protected HashMap<String, LineManager> tableMap;
+//    protected HashMap<String, BPTree<String,Integer>> indexMap;
     protected HashMap<String, BPTree<String,Integer>> indexMap;
 
     FileService(){
@@ -38,7 +40,8 @@ public class FileService {
             tableMap = new HashMap<>();
             DataCollectionFactory.initTables(tableMap,"CityCountryLongitudeLatitude","TimeTemperatureCity");
             indexMap = new HashMap<>();
-            DataCollectionFactory.initIndexs(indexMap,"TimeTemperatureCity_Time_City","CityCountryLongitudeLatitude_City");
+            DataCollectionFactory.initIndexs(true,indexMap,"TimeTemperatureCity_Time_City","CityCountryLongitudeLatitude_City");
+//            DataCollectionFactory.initIndexs(indexMap,"TimeTemperatureCity_Time_City","CityCountryLongitudeLatitude_City");
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -52,10 +55,14 @@ public class FileService {
     }
 
     public static void main(String[] args) {
+        var start = System.currentTimeMillis();
         getService();
+        System.err.println(System.currentTimeMillis()-start);
     }
 
     public static FileService getService(){
+        if(service==null)
+            service = new FileService();
         return service;
     }
 

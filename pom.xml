@@ -8,12 +8,12 @@
     <artifactId>CS307_DATABASE</artifactId>
     <version>1.0-SNAPSHOT</version>
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>de.ruedigermoeller</groupId>-->
-<!--            <artifactId>fst</artifactId>-->
-<!--            <version>[2.04,)</version>-->
+        <dependency>
+            <groupId>de.ruedigermoeller</groupId>
+            <artifactId>fst</artifactId>
+            <version>[2.04,)</version>
 
-<!--        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
