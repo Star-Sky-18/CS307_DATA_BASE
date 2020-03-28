@@ -67,6 +67,8 @@ public class BPTreeInFile<K, V> implements Serializable {
             _to = new String[size];
             this.from = from;
             this.bPTree = bPTree;
+            this.rank = size;
+            this.baseName = bPTree.fileName;
         }
 
 
@@ -265,13 +267,11 @@ public class BPTreeInFile<K, V> implements Serializable {
         protected void serialize() {
             if (this != bPTree.root) {
                 var output = new Output(1 << 20);
-                BufferedOutputStream bytes = null;
                 try {
-                    bytes = new BufferedOutputStream(new FileOutputStream(baseName+name));
+                     output.setOutputStream(new BufferedOutputStream(new FileOutputStream(baseName+name)));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                output.setOutputStream(bytes);
                 kryo.writeObject(output, this);
                 output.close();
             }
@@ -489,7 +489,11 @@ public class BPTreeInFile<K, V> implements Serializable {
 
         protected void serialize() {
             var output = new Output(1 << 20);
-//                output.setOutputStream(new FileOutputStream(bPTree.fileNameBase + name));
+            try {
+                output.setOutputStream(new FileOutputStream(baseName + name));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
             kryo.writeObject(output, this);
             output.close();
         }

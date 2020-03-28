@@ -84,7 +84,7 @@ public class FinalTest {
     @Test
     public void test02_single_index_direct_query() throws Exception {
         System.out.println("\ntest02:");
-        for (int j = 1; j <= 5; j++) {
+        for (int j = 1; j <= 1; j++) {
             System.out.println(j);
             QueueFactory.init();
             var rmi = QueueFactory.getRMIQueue();
@@ -281,21 +281,21 @@ public class FinalTest {
             System.out.println(j);
             QueueFactory.init();
             var callback0 = new BlockReturnCallBack<List<String[]>>(true, true, "5.rmi");
-            callback0.setMax(1);
-            for (int i = 0; i < 1; i++) {
+            callback0.setMax(j*5);
+            for (int i = 0; i < 5*j; i++) {
                 Objects.requireNonNull(QueueFactory.getRMIQueue())
-                        .queryTTCByTimeCity(190001, 200001, "Luzhou", callback0);
+                        .queryTTCByTimeCity(190001, 200001, "Xuanhua", callback0);
             }
             callback0.blockForAll();
             System.out.println("\n-----------------------------");
             var jdbcs = new ArrayList<QueryableQueue>(5 * j);
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < 5*j; i++) {
                 jdbcs.add(QueueFactory.getJDBCQueue(true));
             }
             var callback1 = new BlockReturnCallBack<List<String[]>>(true, true, "5.jdbc");
-            callback1.setMax(1);
-            for (int i = 0; i < 1; i++) {
-                jdbcs.get(i).queryTTCByTimeCity(190001, 200001, "Luzhou", callback1);
+            callback1.setMax(5*j);
+            for (int i = 0; i < 5*j; i++) {
+                jdbcs.get(i).queryTTCByTimeCity(190001, 200001, "Xuanhua", callback1);
             }
             callback1.blockForAll();
             System.out.println("\n-----------------------------");

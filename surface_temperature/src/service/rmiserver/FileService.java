@@ -26,8 +26,8 @@ public class FileService {
     protected DataCollection data;
     private DynamicClassLoader classLoader;
     protected HashMap<String, LineManager> tableMap;
+    protected HashMap<String, BPTreeInFile<String,Integer>> indexMap;
 //    protected HashMap<String, BPTree<String,Integer>> indexMap;
-    protected HashMap<String, BPTree<String,Integer>> indexMap;
 
     FileService(){
         classLoader = new DynamicClassLoader();
@@ -40,8 +40,8 @@ public class FileService {
             tableMap = new HashMap<>();
             DataCollectionFactory.initTables(tableMap,"CityCountryLongitudeLatitude","TimeTemperatureCity");
             indexMap = new HashMap<>();
-            DataCollectionFactory.initIndexs(true,indexMap,"TimeTemperatureCity_Time_City","CityCountryLongitudeLatitude_City");
-//            DataCollectionFactory.initIndexs(indexMap,"TimeTemperatureCity_Time_City","CityCountryLongitudeLatitude_City");
+//            DataCollectionFactory.initIndexs(false,indexMap,"TimeTemperatureCity_Time_City","CityCountryLongitudeLatitude_City");
+            DataCollectionFactory.initIndexs(indexMap,"TimeTemperatureCity_Time_City","CityCountryLongitudeLatitude_City");
         } catch (RemoteException e) {
             e.printStackTrace();
         }

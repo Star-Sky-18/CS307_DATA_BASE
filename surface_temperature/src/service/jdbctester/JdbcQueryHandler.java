@@ -56,8 +56,8 @@ public class JdbcQueryHandler {
 
     protected void handleQueryTTCByTimeCity(Connection con, int timeStart, int timeStop, String city, CallBack<List<String[]>> callBack) {
         try {
-//            var list = queryTTCByTimeCity(con, timeStart, timeStop, city);
-            var list = $(con,timeStart,city);
+            var list = queryTTCByTimeCity(con, timeStart, timeStop, city);
+//            var list = $(con,timeStart,city);
             callBack.callBack(list);
         } catch (Exception e) {
             try {
