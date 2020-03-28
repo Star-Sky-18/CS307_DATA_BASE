@@ -17,9 +17,9 @@ import java.util.concurrent.*;
 
 public class FileService {
     private static FileService service = new FileService();
-    private static final int CORE_POOL_SIZE =16;
-    private static final int MAX_POOL_SIZE =64;
-    private static final int KEEP_ALIVE_TIME =10;
+    private static final int CORE_POOL_SIZE =4;
+    private static final int MAX_POOL_SIZE =50;
+    private static final int KEEP_ALIVE_TIME =60;
     private ThreadPoolExecutor poolExecutor;
     private ServiceQueue serviceQueue;
     protected DataCollection data;
@@ -37,8 +37,8 @@ public class FileService {
             serviceQueue = new RMIServiceQueryQueue(this, new RMIQueryHandler());
             tableMap = new HashMap<>();
             DataCollectionFactory.initTables(tableMap,"CityCountryLongitudeLatitude","TimeTemperatureCity");
-//            indexMap = new HashMap<>();
-//            DataCollectionFactory.initIndexs(indexMap,"TimeTemperatureCity_Time_City","CityCountryLongitudeLatitude_City");
+            indexMap = new HashMap<>();
+            DataCollectionFactory.initIndexs(indexMap,"TimeTemperatureCity_Time_City","CityCountryLongitudeLatitude_City");
         } catch (RemoteException e) {
             e.printStackTrace();
         }

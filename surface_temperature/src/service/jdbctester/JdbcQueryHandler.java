@@ -49,15 +49,15 @@ public class JdbcQueryHandler {
                 "and date =? ");
         state.setString(1, city);
         state.setDate(2, Date.valueOf(stop));
-        state.executeQuery();
-        return null;
-//        return _xuan(state);
+//        state.executeQuery();
+//        return null;
+        return _xuan(state);
     }
 
     protected void handleQueryTTCByTimeCity(Connection con, int timeStart, int timeStop, String city, CallBack<List<String[]>> callBack) {
         try {
-            var list = queryTTCByTimeCity(con, timeStart, timeStop, city);
-//            var list = $(con,timeStart,city);
+//            var list = queryTTCByTimeCity(con, timeStart, timeStop, city);
+            var list = $(con,timeStart,city);
             callBack.callBack(list);
         } catch (Exception e) {
             try {

@@ -9,7 +9,7 @@
         exc = true;
         let labels = [];
         for (let i = 0; i < 10; i++) {
-            labels[i] = (i + 1) * 500 + " concurrency tasks";
+            labels[i] = (i + 1) * 5 + " concurrency tasks";
         }
         chart = new frappe.Chart("#chart", { // or DOM element
             data: {
@@ -17,26 +17,26 @@
                 datasets: [{
                     name: "file I/O's max",
                     chartType: 'bar',
-                    values: [733.33,669.33,1215.33,1255,1148.33,1205.33,1032.66,1099.33,1320,1584.33]
+                    values: [24,24,27.66,39.33,59,59.33,52.66,62.33,55,78.33]
                 }, {
                     name: "postgreSQL's max",
                     chartType: "bar",
-                    values: [409.66,403,507,551.33,927.33,703.33,679,787,913,1151]
+                    values: [13,29.33,39,49,61.66,65,88.66,82,96.66,101.66]
                 },{
                     name: "file I/O's average",
                     chartType: 'line',
-                    values: [487.72,344.35,663.52,641.31,581.87,602.54,549.29,585.33,673.66,901.48]
+                    values: [19.73,16.26,15.93,21.55,28.78,32.54,28.48,36.32,30.3,42.34]
                 },{
                     name: "postgreSQL's average",
                     chartType: 'line',
-                    values: [252.28,217.46,257.87,272.88,438.56,375.2,341.49,399.93,464.18,582.49]
+                    values: [10.06,23.63,24.82,36,34.4,30.06,39.4,40.05,43.93,51.1]
                 }],
-                yMarkers: [{label: "Time cost (ms)", value: 300, options: {labelPos: 'left'}}]
+                yMarkers: [{label: "Time cost (ms)", value: 200, options: {labelPos: 'left'}}]
             },
             lineOptions: {
                 hideDots: 0
             },
-            title: "High Concurrency Index Query in Each Mode",
+            title: "Concurrency Index Query in Each Mode",
             type: 'line', // or 'bar', 'line', 'pie', 'percentage'
             height: 600,
             axisOptions: {

@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import service.TTCFilter;
 import service.QueryableQueue;
+import service.jdbctester.JdbcQueryExecutor;
 import service.jdbctester.JdbcQueryQueue;
 
 import java.io.ByteArrayOutputStream;
@@ -26,6 +27,7 @@ public class FinalTest {
     //    }
     static PrintStream pw;
     static ByteArrayOutputStream bos;
+
     @BeforeClass
     public static void init() {
 //        FileService.getService();
@@ -40,21 +42,22 @@ public class FinalTest {
      */
     @AfterClass
     public static void after() throws Exception {
-        pw = new PrintStream("finalTest_final_3.txt");
+        pw = new PrintStream("finalTest_final_5.txt");
         pw.write(bos.toByteArray());
         pw.close();
+        JdbcQueryExecutor.close();
     }
 
     @Test
     public void test01_single_no_index_query() throws Exception {
         System.out.println("test01:");
         var filter = new TTCFilter("pall", -10, 20, -100, 100, 172001, 180001);
-        for(int j=1;j<=5;j++) {
+        for (int j = 1; j <= 5; j++) {
             System.out.println(j);
             QueueFactory.init();
             var rmi = QueueFactory.getRMIQueue();
             var start = System.currentTimeMillis();
-            for (int i = 0; i < j*3; i++) {
+            for (int i = 0; i < j * 3; i++) {
                 var callBack0 = new BlockReturnCallBack<List<String[]>>(true, true, "1.rmi");
                 assert rmi != null;
                 rmi.queryTTCByFilterWithoutIndex(filter, callBack0);
@@ -65,7 +68,7 @@ public class FinalTest {
             System.err.println(System.currentTimeMillis() - start);
             var jdbc = QueueFactory.getJDBCQueue(false);
             var start2 = System.currentTimeMillis();
-            for (int i = 0; i < j*3; i++) {
+            for (int i = 0; i < j * 3; i++) {
                 var callBack1 = new BlockReturnCallBack<List<String[]>>(true, true, "1.jdbc");
                 jdbc.queryTTCByFilterWithoutIndex(filter, callBack1);
                 callBack1.block();
@@ -80,14 +83,13 @@ public class FinalTest {
     @Test
     public void test02_single_index_direct_query() throws Exception {
         System.out.println("\ntest02:");
-        for(int j=1;j<=5;j++) {
+        for (int j = 1; j <= 5; j++) {
             System.out.println(j);
             QueueFactory.init();
             var rmi = QueueFactory.getRMIQueue();
             var start = System.currentTimeMillis();
-            for (int i = 0; i < j*10; i++) {
+            for (int i = 0; i < j * 10; i++) {
                 var callBack0 = new BlockReturnCallBack<List<String[]>>(true, true, "2.rmi");
-                assert rmi != null;
                 rmi.queryTTCByTimeCity(196001, 198012, "Kashi", callBack0);
                 callBack0.block();
             }
@@ -96,7 +98,7 @@ public class FinalTest {
             System.err.println(System.currentTimeMillis() - start);
             var jdbc = QueueFactory.getJDBCQueue(false);
             var start2 = System.currentTimeMillis();
-            for (int i = 0; i < j*10; i++) {
+            for (int i = 0; i < j * 10; i++) {
                 var callBack1 = new BlockReturnCallBack<List<String[]>>(true, true, "2.jdbc");
                 jdbc.queryTTCByTimeCity(196001, 198012, "Kashi", callBack1);
                 callBack1.block();
@@ -109,14 +111,14 @@ public class FinalTest {
     }
 
     @Test
-    public void test03_single_index_union_query() throws Exception{
+    public void test03_single_index_union_query() throws Exception {
         System.out.println("\ntest03:");
-        for(int j=1;j<=10;j++) {
+        for (int j = 1; j <= 10; j++) {
             System.out.println(j);
             QueueFactory.init();
             var rmi = QueueFactory.getRMIQueue();
             var start = System.currentTimeMillis();
-            for (int i = 0; i < 30*j; i++) {
+            for (int i = 0; i < 30 * j; i++) {
                 var callBack0 = new BlockReturnCallBack<List<String[]>>(true, true, "3.rmi");
                 assert rmi != null;
                 rmi.queryTCCByVagueCity(191001, 192012, "ss", callBack0);
@@ -127,7 +129,7 @@ public class FinalTest {
             System.err.println(System.currentTimeMillis() - start);
             var jdbc = QueueFactory.getJDBCQueue(false);
             var start2 = System.currentTimeMillis();
-            for (int i = 0; i < 30*j; i++) {
+            for (int i = 0; i < 30 * j; i++) {
                 var callBack1 = new BlockReturnCallBack<List<String[]>>(true, true, "3.jdbc");
                 jdbc.queryTCCByVagueCity(191001, 192012, "ss", callBack1);
                 callBack1.block();
@@ -140,14 +142,14 @@ public class FinalTest {
     }
 
     @Test
-    public void test04_single_small_query() throws Exception{
+    public void test04_single_small_query() throws Exception {
         System.out.println("\ntest04:");
-        for(int j=1;j<=10;j++) {
+        for (int j = 1; j <= 10; j++) {
             System.out.println(j);
             var rmi = QueueFactory.getRMIQueue();
             QueueFactory.init();
             var start = System.currentTimeMillis();
-            for (int i = 0; i < 100*j; i++) {
+            for (int i = 0; i < 100 * j; i++) {
                 var callBack0 = new BlockReturnCallBack<String[]>(true, true, "4.rmi");
                 assert rmi != null;
                 rmi.queryCCLLByCity("Taian", callBack0);
@@ -158,7 +160,7 @@ public class FinalTest {
             System.err.println(System.currentTimeMillis() - start);
             var jdbc = QueueFactory.getJDBCQueue(false);
             var start2 = System.currentTimeMillis();
-            for (int i = 0; i < 100*j; i++) {
+            for (int i = 0; i < 100 * j; i++) {
                 var callBack1 = new BlockReturnCallBack<String[]>(true, true, "4.jdbc");
                 jdbc.queryCCLLByCity("Taian", callBack1);
                 callBack1.block();
@@ -167,57 +169,63 @@ public class FinalTest {
             System.err.println(System.currentTimeMillis() - start2);
             System.out.println(System.currentTimeMillis() - start2);
         }
+//        asserts(callBack0,callBack1,true);
     }
 
     @Test
-    public void test05_parallel_index_query() throws Exception{
+    public void test05_parallel_index_query() throws Exception {
         System.out.println("\ntest05:");
-        for(int j=1;j<=10;j++) {
+        var flag = true;
+        for (int j = 1; j <= 10; j++) {
             System.out.println(j);
             QueueFactory.init();
             var callback0 = new BlockReturnCallBack<List<String[]>>(true, true, "5.rmi");
-            callback0.setMax(5*j);
-            for (int i = 0; i < 5*j; i++) {
+            callback0.setMax(5 * j);
+            for (int i = 0; i < 5 * j; i++) {
                 Objects.requireNonNull(QueueFactory.getRMIQueue())
                         .queryTTCByTimeCity(200001, 200001, "Xuanhua", callback0);
             }
             callback0.blockForAll();
             System.out.println("\n-----------------------------");
-            var jdbcs = new ArrayList<QueryableQueue>(5*j);
-            for (int i = 0; i < 5*j; i++) {
+            var jdbcs = new ArrayList<QueryableQueue>(5 * j);
+            for (int i = 0; i < 5 * j; i++) {
                 jdbcs.add(QueueFactory.getJDBCQueue(true));
             }
             var callback1 = new BlockReturnCallBack<List<String[]>>(true, true, "5.jdbc");
-            callback1.setMax(5*j);
-            for (int i = 0; i < 5*j; i++) {
+            callback1.setMax(5 * j);
+            for (int i = 0; i < 5 * j; i++) {
                 jdbcs.get(i).queryTTCByTimeCity(200001, 200001, "Xuanhua", callback1);
             }
             callback1.blockForAll();
             System.out.println("\n-----------------------------");
+            if (flag) {
+                j--;
+                flag = false;
+            }
         }
     }
 
     @Test
-    public void test06_parallel_no_index_query() throws Exception{
+    public void test06_parallel_no_index_query() throws Exception {
         System.out.println("\ntest06:");
         var filter = new TTCFilter("men", -5, 30, -10, 20, 192001, 200001);
-        for(int j=1;j<=10;j++) {
+        for (int j = 1; j <= 10; j++) {
             System.out.println(j);
             var callback0 = new BlockReturnCallBack<List<String[]>>(true, true, "6.rmi");
-            callback0.setMax(5*j);
-            for (int i = 0; i < 5*j; i++) {
+            callback0.setMax(5 * j);
+            for (int i = 0; i < 5 * j; i++) {
                 Objects.requireNonNull(QueueFactory.getRMIQueue())
                         .queryTTCByFilterWithoutIndex(filter, callback0);
             }
             callback0.blockForAll();
             System.out.println("\n-----------------------------");
-            var jdbcs = new ArrayList<QueryableQueue>(5*j);
-            for (int i = 0; i < 5*j; i++) {
+            var jdbcs = new ArrayList<QueryableQueue>(5 * j);
+            for (int i = 0; i < 5 * j; i++) {
                 jdbcs.add(QueueFactory.getJDBCQueue(true));
             }
             var callback1 = new BlockReturnCallBack<List<String[]>>(true, true, "6.jdbc");
-            callback1.setMax(5*j);
-            for (int i = 0; i < 5*j; i++) {
+            callback1.setMax(5 * j);
+            for (int i = 0; i < 5 * j; i++) {
                 jdbcs.get(i).queryTTCByFilterWithoutIndex(filter, callback1);
             }
             callback1.blockForAll();
@@ -226,61 +234,66 @@ public class FinalTest {
     }
 
     @Test
-    public void test07_high_concurrency_index_query() throws Exception{
-        for(int j=1;j<=10;j++) {
+    public void test07_high_concurrency_index_query() throws Exception {
+        var flag = true;
+        for (int j = 1; j <= 10; j++) {
             System.out.println(j);
             System.err.println(j);
             QueueFactory.init();
+            var queue = QueueFactory.getRMIQueue();
             var callback0 = new BlockReturnCallBack<List<String[]>>(true, true, "5.rmi");
-            callback0.setMax(50*10*j);
+            callback0.setMax(50 * 10 * j);
             for (int i = 0; i < 50; i++) {
-                for(int k=0;k<10*j;k++)
-                    Objects.requireNonNull(QueueFactory.getRMIQueue())
-                        .queryTTCByTimeCity(200001, 200001, "Xuanhua", callback0);
+                for (int k = 0; k < 10 * j; k++)
+                    queue.queryTTCByTimeCity(200001, 200001, "Xuanhua", callback0);
             }
             callback0.blockForAll();
             System.out.println("\n-----------------------------");
-            var jdbcs = new ArrayList<QueryableQueue>(5*j);
+            var jdbcs = new ArrayList<QueryableQueue>(5 * j);
             for (int i = 0; i < 50; i++) {
-                    jdbcs.add(QueueFactory.getJDBCQueue(false));
+                jdbcs.add(QueueFactory.getJDBCQueue(false));
             }
             var callback1 = new BlockReturnCallBack<List<String[]>>(true, true, "5.jdbc");
-            callback1.setMax(50*10*j);
+            callback1.setMax(50 * 10 * j);
             for (int i = 0; i < 50; i++) {
-                for(int k=0;k<10*j;k++)
-                jdbcs.get(i).queryTTCByTimeCity(200001, 200001, "Xuanhua", callback1);
+                for (int k = 0; k < 10 * j; k++)
+                    jdbcs.get(i).queryTTCByTimeCity(200001, 200001, "Xuanhua", callback1);
             }
             callback1.blockForAll();
 
             for (int i = 0; i < 50; i++) {
-                ((JdbcQueryQueue)jdbcs.get(i)).close();
+                ((JdbcQueryQueue) jdbcs.get(i)).close();
             }
             System.out.println("\n-----------------------------");
+            if (flag) {
+                j--;
+                flag = false;
+            }
         }
     }
 
 
     @Test
-    public void test08_parallel_index_query() throws Exception{
+    public void test08_special_index_query() throws Exception {
         System.out.println("\ntest08:");
-        for(int j=1;j<=10;j++) {
+        for (int j = 1; j <= 10; j++) {
             System.out.println(j);
             QueueFactory.init();
             var callback0 = new BlockReturnCallBack<List<String[]>>(true, true, "5.rmi");
-            callback0.setMax(5*j);
-            for (int i = 0; i < 5*j; i++) {
+            callback0.setMax(5 * j);
+            for (int i = 0; i < 5 * j; i++) {
                 Objects.requireNonNull(QueueFactory.getRMIQueue())
                         .queryTTCByTimeCity(190001, 200001, "Xuanhua", callback0);
             }
             callback0.blockForAll();
             System.out.println("\n-----------------------------");
-            var jdbcs = new ArrayList<QueryableQueue>(5*j);
-            for (int i = 0; i < 5*j; i++) {
+            var jdbcs = new ArrayList<QueryableQueue>(5 * j);
+            for (int i = 0; i < 5 * j; i++) {
                 jdbcs.add(QueueFactory.getJDBCQueue(true));
             }
             var callback1 = new BlockReturnCallBack<List<String[]>>(true, true, "5.jdbc");
-            callback1.setMax(5*j);
-            for (int i = 0; i < 5*j; i++) {
+            callback1.setMax(5 * j);
+            for (int i = 0; i < 5 * j; i++) {
                 jdbcs.get(i).queryTTCByTimeCity(190001, 200001, "Xuanhua", callback1);
             }
             callback1.blockForAll();
@@ -301,5 +314,9 @@ public class FinalTest {
             return s;
         }).map(s -> String.join("", s)).sorted().collect(Collectors.joining());
         assertEquals(rL, jL);
+    }
+
+    private void asserts(BlockReturnCallBack<String[]> callBack0, BlockReturnCallBack<String[]> callBack1, boolean b1) throws InterruptedException {
+        assertEquals(String.join(",", callBack0.block()).replaceAll("\\s+", ""), String.join(",", callBack1.block()).replaceAll("\\s+", ""));
     }
 }

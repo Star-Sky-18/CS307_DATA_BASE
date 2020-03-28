@@ -8,7 +8,7 @@ public class JdbcQueryExecutor {
     private static JdbcQueryExecutor executor = new JdbcQueryExecutor();
     private static final int CORE_POOL_SIZE =50;
     private static final int MAX_POOL_SIZE =50;
-    private static final int KEEP_ALIVE_TIME =10;
+    private static final int KEEP_ALIVE_TIME =60;
 
     private ThreadPoolExecutor poolExecutor;
     private JdbcQueryExecutor(){
@@ -22,5 +22,9 @@ public class JdbcQueryExecutor {
 
     protected void execute(Runnable r){
         this.poolExecutor.execute(r);
+    }
+
+    public static void close(){
+        executor.poolExecutor.shutdown();
     }
 }

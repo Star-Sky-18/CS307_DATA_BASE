@@ -29,7 +29,7 @@ let dill = function (arr1, arr2, arr3, flag) {
 }
 
 
-let content = fs.readFileSync("../surface_temperature/oldtest05.txt").toString();
+let content = fs.readFileSync("../surface_temperature/test05.txt").toString();
 let contents = content.split("\r\n");
 let values = [];
 for (let i = 0; i < contents.length; i++) {

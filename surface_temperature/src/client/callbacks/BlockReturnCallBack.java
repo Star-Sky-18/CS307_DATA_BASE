@@ -39,7 +39,7 @@ public class BlockReturnCallBack<T> extends PrintCallBack<T> implements CallBack
             Thread.sleep(50);
         if (autoUnexport) {
             try {
-                UnicastRemoteObject.unexportObject(this, false);
+                UnicastRemoteObject.unexportObject(this, true);
             } catch (NoSuchObjectException e) {
                 e.printStackTrace();
             }
