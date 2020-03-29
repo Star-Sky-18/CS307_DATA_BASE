@@ -13,6 +13,7 @@ import service.jdbctester.JdbcQueryQueue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -300,6 +301,17 @@ public class FinalTest {
             callback1.blockForAll();
             System.out.println("\n-----------------------------");
         }
+    }
+
+    @Test
+    public void test09_DBMS() throws Exception {
+        QueryableQueue queue = QueueFactory.getJDBCQueue(false);
+        var call0 = new BlockReturnCallBack<List<String[]>>(true,true,"");
+        queue.queryTTCByTimeCity(190001,200001,"Xuanhua",call0);
+        call0.block();
+        var call1 = new BlockReturnCallBack<List<String[]>>(true,true,"");
+        queue.queryTTCByTimeCity(180001,190001,"Cherkasy",call1);
+        call1.block();
     }
 
     private void asserts(BlockReturnCallBack<List<String[]>> callBack0, BlockReturnCallBack<List<String[]>> callBack1) throws InterruptedException {
