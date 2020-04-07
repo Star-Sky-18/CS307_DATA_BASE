@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unchecked")
 public class DataCollectionFactory {
     static File lraDir = new File("lras");
-    static File treeDir = new File("fileTrees");
+    static File treeDir = new File("trees");
     static HashMap<String,String[]> columnMap;
 
     static{

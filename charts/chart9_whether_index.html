@@ -9,34 +9,26 @@
         exc = true;
         let labels = [];
         for (let i = 0; i < 10; i++) {
-            labels[i] = (i + 1) * 5 + " concurrency tasks";
+            labels[i] = (i+1)*10+" times query";
         }
         chart = new frappe.Chart("#chart", { // or DOM element
             data: {
                 labels: labels,
                 datasets: [{
-                    name: "file I/O's max",
+                    name: "index psql",
                     chartType: 'bar',
-                    values: [49.33,60.66,64,96,71,89,107.66,121.33,141.33,136.66]
+                    values: [ 2393, 4726, 6515, 8897, 10883, 13108, 17353, 17771, 21198, 22152 ]
                 }, {
-                    name: "postgreSQL's max",
+                    name: "no index psql",
                     chartType: "bar",
-                    values: [2507.33,3326,5111.33,6251.66,7700,8671.66,9992.66,10929,12978.66,13107.33]
-                },{
-                    name: "file I/O's average",
-                    chartType: 'line',
-                    values: [41.86,56.66,61.84,94.28,65.08,87.78,104.02,105.59,137.94,124.61]
-                },{
-                    name: "postgreSQL's average",
-                    chartType: 'line',
-                    values: [2071,2776.1,4363.93,5567.3,7056.18,7592.68,7892.29,8835.32,9713.22,10753.79]
+                    values: [ 13416, 18818, 27847, 37534, 45572, 55279, 63293, 82498, 98485, 101308 ]
                 }],
-                yMarkers: [{label: "Time cost (ms)", value: 30000, options: {labelPos: 'left'}}]
+                yMarkers: [{label: "Time cost (ms)", value: 200000, options: {labelPos: 'left'}}]
             },
             lineOptions: {
                 hideDots: 0
             },
-            title: "Special Concurrency Index Query in Each Mode",
+            title: "The time cost of index/no index JDBC Database Query",
             type: 'line', // or 'bar', 'line', 'pie', 'percentage'
             height: 600,
             axisOptions: {
@@ -44,7 +36,7 @@
                 yAxisMode: 'span',
                 xAxisMode: 'tick'
             },
-            colors: ['light-blue', 'green', 'red', '#ffa3ef', 'grey'],
+            colors: ['light-blue', 'green', 'red', 'light-blue', 'grey'],
 
             tooltipOptions: {
                 formatTooltipX: d => (d + '').toUpperCase(),
@@ -53,7 +45,7 @@
         });
         // chart.export()
         this.console.log('???!!!')
-        $('.title').css({fontSize: '20px', fill: 'rgb(0,0,0)'})
+        $('.title').css({fontSize: '20px',fill:'rgb(0,0,0)'})
         $('.chart-label').css({fontSize: '12px'})
     };
 
