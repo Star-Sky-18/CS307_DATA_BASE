@@ -9,4 +9,4 @@ where (district,cnt) in (
 select district ,max(cnt) from chrs
     group by district
 )
-order by district;
+order by district, chr;

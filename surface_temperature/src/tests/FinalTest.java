@@ -6,18 +6,19 @@ import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import service.TTCFilter;
 import service.QueryableQueue;
+import service.TTCFilter;
 import service.jdbctester.JdbcQueryExecutor;
 import service.jdbctester.JdbcQueryQueue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class FinalTest {
